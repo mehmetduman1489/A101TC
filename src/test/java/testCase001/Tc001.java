@@ -43,7 +43,7 @@ public class Tc001 {/*
 
     @AfterClass
     public static void afterClass() {
-        //driver.close();
+        driver.close();
     }
 
     @Test
