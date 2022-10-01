@@ -1,21 +1,15 @@
 package testCase001;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
-import org.junit.AfterClass;
+import com.github.javafaker.Faker;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.Select;
+import utilities.TestBaseBeforeClassAfterClass;
 
-import java.time.Duration;
-
-public class Tc001 {/*
+public class Tc001 extends TestBaseBeforeClassAfterClass {/*
 - Senaryoya üye kaydı oluşturmadan devam edilecek.
 - Giyim--> Aksesuar--> Kadın İç Giyim-->Dizaltı Çorap bölümüne girilir.
 - Açılan ürünün siyah olduğu doğrulanır.
@@ -29,27 +23,12 @@ public class Tc001 {/*
 
 */
 
-    static WebDriver driver;
-
-    @BeforeClass
-    public static void beforeClass() {
-        WebDriverManager.chromedriver().setup();
-        driver = new ChromeDriver();
-        driver.manage().window().maximize();
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(15));
-        driver.get("https://www.a101.com.tr");
-        driver.findElement(By.xpath("//*[text()='Kabul Et']")).click();
-    }
-
-    @AfterClass
-    public static void afterClass() {
-        driver.close();
-    }
-
     @Test
     public void test1() throws InterruptedException {
         //- Giyim--> Aksesuar--> Kadın İç Giyim-->Dizaltı Çorap bölümüne girilir.
-        Actions actions = new Actions(driver);
+        driver.get("https://www.a101.com.tr");
+        driver.findElement(By.xpath("//*[text()='Kabul Et']")).click();
+
         WebElement subMenu = driver.findElement(By.xpath("(//*[@title='GİYİM & AKSESUAR'])[1]"));
         actions.moveToElement(subMenu).perform();
         driver.findElement(By.xpath("//*[text()='Dizaltı Çorap']")).click();
@@ -71,22 +50,31 @@ public class Tc001 {/*
         Assert.assertTrue(driver.findElement(By.xpath("//*[@class='new-address js-new-address']")).isDisplayed());
         driver.findElement(By.xpath("//*[@class='new-address js-new-address']")).click();
         //Adres oluştur dedikten sonra ödeme ekranı gelir.
-        driver.findElement(By.xpath("//*[@name='title']")).sendKeys("Ev");
-        driver.findElement(By.xpath("//*[@name='first_name']")).sendKeys("Mehmet");
-        driver.findElement(By.xpath("//*[@name='last_name']")).sendKeys("Duman");
-        driver.findElement(By.xpath("//*[@name='phone_number']")).sendKeys("05441768695");
+        Faker faker = new Faker();
+        WebElement adresIsim = driver.findElement(By.xpath("//*[@name='title']"));
+        adresIsim.click();
+        actions.sendKeys("Ev")
+                .sendKeys(Keys.TAB).
+                sendKeys(faker.name().firstName()).sendKeys(Keys.TAB).
+                sendKeys(faker.name().lastName()).sendKeys(Keys.TAB).
+                sendKeys(faker.numerify("05441768695")).perform();
         driver.findElement(By.xpath("//*[@name='city']")).sendKeys("BALIKESİR");
         WebElement ilce = driver.findElement(By.xpath("//*[@name='township']"));
         Select select = new Select(ilce);
         select.selectByIndex(14);
-        WebElement mahalle = driver.findElement(By.xpath("//*[@name='district']"));
+        Thread.sleep(2000);
+        WebElement mahalle = driver.findElement(By.xpath("//*[@class='js-district']"));
         Select select1 = new Select(mahalle);
-        Thread.sleep(1000);
         select1.selectByIndex(4);
-        Thread.sleep(1000);
-        driver.findElement(By.xpath("//*[@name='line']")).sendKeys("403 sokak no 27 kat 1");
-        Thread.sleep(1000);
-        driver.findElement(By.xpath("//*[@class='button green js-set-country js-prevent-emoji']")).click();
+        Thread.sleep(2000);
+
+
+        WebElement fulladres = driver.findElement(By.xpath("//*[@name='line']"));
+
+        fulladres.click();
+        actions.sendKeys(faker.address().fullAddress()).perform();
+
+        driver.findElement(By.xpath("//*[@class='button green address-modal-submit-button js-set-country js-prevent-emoji js-address-form-submit-button']")).click();
         //- Siparişi tamamla butonuna tıklayarak, ödeme ekranına gidildiği ,doğru ekrana yönlendiklerini kontrol edecekler.
         Thread.sleep(2000);
         driver.findElement(By.xpath("//*[@class='button block green js-proceed-button']")).click();
